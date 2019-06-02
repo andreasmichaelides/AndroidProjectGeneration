@@ -1,0 +1,21 @@
+package {{packageName}}.features.{{featureNameLowerCase}}.presentation
+
+import {{corePackageName}}.logger.Logger
+import {{corePackageName}}.presentation.StateViewModel
+import {{corePackageName}}.presentation.ModelTransformer
+import {{corePackageName}}.schedulers.SchedulersProvider
+import {{packageName}}.features.{{featureNameLowerCase}}.presentation.model.*
+
+class {{featureName}}ViewModel(logger: Logger,
+schedulersProvider: SchedulersProvider)
+    : StateViewModel<{{featureName}}UiModel>({{featureName}}UiModel(),
+        logger,
+        schedulersProvider) {
+
+        init {
+        subscriptions.addAll(
+
+        )
+        }
+
+}

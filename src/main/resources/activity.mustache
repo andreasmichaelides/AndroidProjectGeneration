@@ -1,0 +1,28 @@
+package {{packageName}}.features.{{featureNameLowerCase}}.presentation
+
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import {{corePackageName}}.presentation.popAll
+import {{packageName}}.R
+import {{packageName}}.features.{{featureNameLowerCase}}.presentation.model.{{featureName}}UiModel
+import org.koin.android.ext.android.inject
+
+class {{featureName}}Activity : AppCompatActivity() {
+
+private val {{featureNameLowerUnderscore}}ViewModel: {{featureName}}ViewModel by inject()
+
+override fun onCreate(savedInstanceState: Bundle?) {
+super.onCreate(savedInstanceState)
+setContentView(R.layout.activity_{{featureNameCamelCaseLower}})
+
+{{featureNameLowerUnderscore}}ViewModel.activityUiModel().observe(this, Observer { onStateChanged(it) })
+}
+
+private fun onStateChanged(uiModel: {{featureName}}UiModel) {
+
+uiModel.activityActions.popAll {
+
+}
+}
+}

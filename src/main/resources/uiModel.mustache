@@ -1,0 +1,14 @@
+package {{packageName}}.features.{{featureNameLowerCase}}.presentation.model
+
+import {{corePackageName}}.presentation.Input
+import {{corePackageName}}.presentation.UiModel
+import java.util.*
+
+data class {{featureName}}UiModel(
+val isLoading: Boolean = false
+) :UiModel(Stack(), Stack(), Stack())
+
+object ExampleLoadDataInput : Input<{{featureName}}UiModel> {
+    override fun transformState(uiModel: {{featureName}}UiModel): {{featureName}}UiModel =
+    {{featureName}}UiModel(true)
+}
