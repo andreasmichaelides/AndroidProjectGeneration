@@ -2,6 +2,7 @@ package codegen.feature
 
 import codegen.model.MustacheModel
 import codegen.tools.findLastActivityEntryLine
+import codegen.tools.getManifestFile
 import com.github.mustachejava.DefaultMustacheFactory
 import com.github.mustachejava.Mustache
 import com.google.common.collect.Iterables.skip
@@ -13,6 +14,7 @@ import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
 import toLowerCameCase
 import toLowerUnderscore
+import writeFile
 import writeMustacheTemplate
 import java.io.File
 import java.io.IOException
@@ -33,6 +35,7 @@ fun createFeature(
     val packagePath = androidAppModulePath + packageName.replace(".", "/")
     val featurePackagePath =
         "$packagePath${File.separator}features${File.separator}${featureName.toLowerCase()}${File.separator}presentation"
+
     val featureMustacheModels = listOf(
         FeatureViewModel(
             "${featureName}FsViewModel",
@@ -77,14 +80,19 @@ fun addActivityToManifest(
     featureName: String
 ) {
     val mustache = mustacheFactory.compile("AndroidManifest_ActivityPartial.xml.mustache")
-    val mustacheModel = Manifest(featureName, "", "", mustache, featureName.toLowerCase())
+    val mustacheModel = Manifest(featureName, "", "", mustache, featureName, featureName.toLowerCase())
 //    val kotlinClassWriter = getFileWriter(androidAppResourcesPath, "AndroidManifest", ".xml")
 
     val writer = StringWriter()
     val activityEntry = mustache.execute(writer, mustacheModel)
     val activityEntryLine = findLastActivityEntryLine(androidAppResourcesPath) + 1
+    val manifestFile = getManifestFile(androidAppResourcesPath)
 
+    val mutableList = manifestFile.readLines().toMutableList()
+    mutableList.addAll(activityEntryLine, activityEntry.toString().lines())
 //    System.out.println("Linenumber: $lineNumber")
+
+    writeFile(manifestFile.toPath(), mutableList)
 }
 
 
@@ -134,5 +142,6 @@ data class Manifest(
     override val packageName: String,
     override val corePackageName: String,
     override val mustache: Mustache,
+    val featureName: String,
     val featureNameLowerCase: String
 ) : MustacheModel(className, packageName, corePackageName, mustache)

@@ -8,7 +8,10 @@ import java.io.IOException
 import java.io.InputStream
 
 fun findLastActivityEntryLine(androidAppResourcesPath: String) : Int =
-    parse(File("$androidAppResourcesPath/AndroidManifest.xml").inputStream())
+    parse(getManifestFile(androidAppResourcesPath).inputStream())
+
+fun getManifestFile(androidAppResourcesPath: String) =
+    File("$androidAppResourcesPath/AndroidManifest.xml")
 
 @Throws(XmlPullParserException::class, IOException::class)
 fun parse(inputStream: InputStream): Int {
@@ -24,7 +27,7 @@ fun parse(inputStream: InputStream): Int {
 
 @Throws(XmlPullParserException::class, IOException::class)
 private fun readFeed(parser: XmlPullParser): Int {
-
+    var line = 0
     parser.require(XmlPullParser.START_TAG, null, "manifest")
 
     while (parser.next() != XmlPullParser.END_TAG) {
@@ -33,13 +36,13 @@ private fun readFeed(parser: XmlPullParser): Int {
         }
         // Starts by looking for the entry tag
         if (parser.name == "application") {
-            val line = readApplication(parser)
+            line = readApplication(parser)
             System.out.println("LineNumber: $line")
         } else {
             skip(parser)
         }
     }
-    return 0
+    return line
 }
 
 @Throws(IOException::class, XmlPullParserException::class)

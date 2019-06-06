@@ -5,6 +5,9 @@ import com.github.mustachejava.Mustache
 import com.google.common.base.CaseFormat
 import java.io.File
 import java.io.PrintWriter
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Path
 
 
 fun main(args: Array<String>) {
@@ -20,6 +23,9 @@ fun main(args: Array<String>) {
     createFeature(featureName, packageName, corePackageName, mustacheFactory)
 }
 
+fun writeFile(path: Path, lines: List<String>) {
+    Files.write(path, lines, StandardCharsets.UTF_8)
+}
 
 fun writeMustacheTemplate(mustache: Mustache, mustacheModel: MustacheModel, writer: PrintWriter) {
     mustache.execute(writer, mustacheModel).flush()
