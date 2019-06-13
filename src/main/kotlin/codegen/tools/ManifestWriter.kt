@@ -15,10 +15,10 @@ fun getManifestFile(androidAppResourcesPath: String) =
 
 @Throws(XmlPullParserException::class, IOException::class)
 fun parse(inputStream: InputStream): Int {
-    inputStream.use { inputStream ->
+    inputStream.use { stream ->
         val parser: XmlPullParser = MXParserFactory.newInstance().newPullParser()
         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
-        parser.setInput(inputStream, null)
+        parser.setInput(stream, null)
         parser.nextTag()
         return readFeed(parser)
     }
@@ -37,7 +37,6 @@ private fun readFeed(parser: XmlPullParser): Int {
         // Starts by looking for the entry tag
         if (parser.name == "application") {
             line = readApplication(parser)
-            System.out.println("LineNumber: $line")
         } else {
             skip(parser)
         }
@@ -53,7 +52,6 @@ private fun readApplication(parser: XmlPullParser): Int {
         if (parser.eventType != XmlPullParser.START_TAG) {
             continue
         }
-        System.out.println("Name: ${parser.name}")
         when (parser.name) {
             "activity" -> lineNumber = readActivity(parser)
             else -> skip(parser)
@@ -75,8 +73,6 @@ private fun readActivity(parser: XmlPullParser): Int {
         skip(parser)
     }
 
-//    val title = readText(parser)
-//    parser.require(XmlPullParser.END_TAG, null, "activity")
     return parser.lineNumber
 }
 

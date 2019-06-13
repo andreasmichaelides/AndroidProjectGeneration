@@ -1,27 +1,10 @@
 package codegen.feature
 
 import codegen.model.MustacheModel
-import codegen.tools.findLastActivityEntryLine
-import codegen.tools.getManifestFile
+import codegen.tools.*
 import com.github.mustachejava.DefaultMustacheFactory
-import com.github.mustachejava.Mustache
-import com.google.common.collect.Iterables.skip
-import com.google.common.collect.Multiset
-import getFileWriter
-import org.xmlpull.mxp1.MXParserFactory
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlPullParserException
-import org.xmlpull.v1.XmlPullParserFactory
-import toLowerCameCase
-import toLowerUnderscore
-import writeFile
-import writeMustacheTemplate
 import java.io.File
-import java.io.IOException
-import java.io.InputStream
 import java.io.StringWriter
-
-
 
 
 fun createFeature(
@@ -34,7 +17,9 @@ fun createFeature(
     val androidAppResourcesPath = "src/main/"
     val packagePath = androidAppModulePath + packageName.replace(".", "/")
     val featurePackagePath =
-        "$packagePath${File.separator}features${File.separator}${featureName.toLowerCase()}${File.separator}presentation"
+        "$packagePath${File.separator}features${File.separator}${featureName.toLowerCase()}"
+
+    val featurePresentationPath = "$featurePackagePath${File.separator}presentation"
 
     val featureMustacheModels = listOf(
         FeatureViewModel(
@@ -42,6 +27,7 @@ fun createFeature(
             packageName,
             corePackageName,
             mustacheFactory.compile("featureViewModel.mustache"),
+            featurePresentationPath,
             featureName,
             featureName.toLowerCase()
         ),
@@ -50,6 +36,7 @@ fun createFeature(
             packageName,
             corePackageName,
             mustacheFactory.compile("activity.mustache"),
+            featurePresentationPath,
             featureName,
             featureName.toLowerCase(),
             featureName.toLowerUnderscore(),
@@ -60,13 +47,24 @@ fun createFeature(
             packageName,
             corePackageName,
             mustacheFactory.compile("uiModel.mustache"),
+            featurePresentationPath,
             featureName,
             featureName.toLowerCase()
+        ),
+        Module(
+            "${featureName}Module",
+            packageName,
+            corePackageName,
+            mustacheFactory.compile("FeatureModule.kt.mustache"),
+            featurePackagePath,
+            featureName,
+            featureName.toLowerCase(),
+            featureName.toLowerCameCase()
         )
     )
 
     featureMustacheModels.forEach {
-        val kotlinClassWriter = getFileWriter(featurePackagePath, it.className, ".kt")
+        val kotlinClassWriter = getFileWriter(it.filePath, it.className, ".kt")
         writeMustacheTemplate(it.mustache, it, kotlinClassWriter)
     }
 
@@ -80,8 +78,7 @@ fun addActivityToManifest(
     featureName: String
 ) {
     val mustache = mustacheFactory.compile("AndroidManifest_ActivityPartial.xml.mustache")
-    val mustacheModel = Manifest(featureName, "", "", mustache, featureName, featureName.toLowerCase())
-//    val kotlinClassWriter = getFileWriter(androidAppResourcesPath, "AndroidManifest", ".xml")
+    val mustacheModel = Manifest(featureName, "", "", mustache, "", featureName, featureName.toLowerCase())
 
     val writer = StringWriter()
     val activityEntry = mustache.execute(writer, mustacheModel)
@@ -90,58 +87,14 @@ fun addActivityToManifest(
 
     val mutableList = manifestFile.readLines().toMutableList()
     mutableList.addAll(activityEntryLine, activityEntry.toString().lines())
-//    System.out.println("Linenumber: $lineNumber")
 
     writeFile(manifestFile.toPath(), mutableList)
 }
 
-
-
-
-
 fun writeActivityLayoutFile(androidAppModulePath: String, mustacheFactory: DefaultMustacheFactory, featureName: String) {
     val resourcesPath = "$androidAppModulePath/res/layout"
     val mustache = mustacheFactory.compile("activityLayout.mustache")
-    val mustacheModel = MustacheModel("", "", "", mustache)
+    val mustacheModel = MustacheModel("", "", "", mustache, "")
     val kotlinClassWriter = getFileWriter(resourcesPath, "activity_${featureName.toLowerUnderscore()}", ".xml")
     writeMustacheTemplate(mustache, mustacheModel, kotlinClassWriter)
 }
-
-
-data class FeatureViewModel(
-    override val className: String,
-    override val packageName: String,
-    override val corePackageName: String,
-    override val mustache: Mustache,
-    val featureName: String,
-    val featureNameLowerCase: String
-) : MustacheModel(className, packageName, corePackageName, mustache)
-
-data class FeatureUiModel(
-    override val className: String,
-    override val packageName: String,
-    override val corePackageName: String,
-    override val mustache: Mustache,
-    val featureName: String,
-    val featureNameLowerCase: String
-) : MustacheModel(className, packageName, corePackageName, mustache)
-
-data class FeatureActivity(
-    override val className: String,
-    override val packageName: String,
-    override val corePackageName: String,
-    override val mustache: Mustache,
-    val featureName: String,
-    val featureNameLowerCase: String,
-    val featureNameCamelCaseLower: String,
-    val featureNameLowerUnderscore: String
-) : MustacheModel(className, packageName, corePackageName, mustache)
-
-data class Manifest(
-    override val className: String,
-    override val packageName: String,
-    override val corePackageName: String,
-    override val mustache: Mustache,
-    val featureName: String,
-    val featureNameLowerCase: String
-) : MustacheModel(className, packageName, corePackageName, mustache)

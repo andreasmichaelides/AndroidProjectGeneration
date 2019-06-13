@@ -1,0 +1,9 @@
+package {{packageName}}.features.{{featureNameLowerCase}}
+
+import {{packageName}}.features.{{featureNameLowerCase}}.presentation.{{featureName}}ViewModel
+import org.koin.androidx.viewmodel.ext.koin.viewModel
+import org.koin.dsl.module.module
+
+val {{featureNameCamelCaseLower}}Module = module {
+viewModel { {{featureName}}ViewModel(get(), get()) }
+}
