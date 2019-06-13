@@ -20,6 +20,7 @@ dependencies {
 
     compile group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.9'
     compile group: 'org.apache.servicemix.bundles', name: 'org.apache.servicemix.bundles.xpp3', version: '1.1.4c_7'
+    compile 'com.google.code.gson:gson:2.8.5'
 }
 
 
